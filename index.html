@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For You ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* === BASE STYLES & ANIMATED BACKGROUND === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body {
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #ff9a9e, #fecfef, #a1c4fd, #c2e9fb);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #333;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* === GLASSMORPHISM UI === */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            z-index: 10;
+            width: 90%;
+            max-width: 400px;
+            transition: all 0.5s ease;
+        }
+
+        h1 { font-weight: 800; color: #ff4d6d; margin-bottom: 0.5rem; font-size: 2rem; }
+        p { font-weight: 600; color: #555; margin-bottom: 2rem; }
+
+        /* === BUTTONS === */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            min-height: 50px;
+        }
+        .btn {
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .btn-yes {
+            background: linear-gradient(45deg, #ff4d6d, #ff758c);
+            color: white;
+            z-index: 5;
+        }
+        .btn-yes:hover { box-shadow: 0 0 20px rgba(255, 77, 109, 0.6); }
+        .btn-no {
+            background: white;
+            color: #ff4d6d;
+            border: 2px solid #ff4d6d;
+            position: relative;
+            z-index: 4;
+        }
+
+        /* === REVEAL SCREEN === */
+        #revealScreen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20;
+            animation: fadeIn 1s forwards;
+        }
+        .reveal-title { font-size: 3rem; color: white; text-shadow: 0 4px 15px rgba(255, 77, 109, 0.5); animation: heartbeat 1.5s infinite; }
+        .reveal-sub { font-size: 1.2rem; color: white; background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 20px; margin-top: 10px; }
+        
+        .surprise-btn {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #ff4d6d;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        /* === MODAL === */
+        #surpriseModal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 30;
+            width: 85%; max-width: 350px;
+        }
+        .modal-message { font-size: 1.3rem; color: #ff4d6d; font-weight: 800; min-height: 80px; display: flex; align-items: center; justify-content: center;}
+        
+        /* === PARTICLES & ANIMATIONS === */
+        .heart-particle {
+            position: fixed;
+            font-size: 24px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 15;
+            animation: floatUp linear forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; backdrop-filter: blur(0px); }
+            to { opacity: 1; backdrop-filter: blur(20px); background: rgba(255, 77, 109, 0.4); }
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.05); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.05); }
+        }
+        .shake { animation: shake 0.3s; }
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Audio Control */
+        #musicToggle {
+            position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.5); 
+            border: none; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Optional Background Music (Replace src with a direct link to an mp3) -->
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/architecture/Music/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    <button id="musicToggle">🎵</button>
+
+    <!-- Main Interaction Screen -->
+    <div class="glass-card" id="mainCard">
+        <h1>do u love me booo? 🥺❤️</h1>
+        <p>answer honestly...</p>
+        <div class="btn-container">
+            <button class="btn btn-yes" id="yesBtn">yes 💖</button>
+            <button class="btn btn-no" id="noBtn">no 😤</button>
+        </div>
+    </div>
+
+    <!-- Reveal Screen -->
+    <div id="revealScreen">
+        <h1 class="reveal-title">I LOVEEEE YOUUUU AMIRAHH FATINN<br> SO MUCHHH ❤️</h1>
+        <div class="reveal-sub">u are now officially stuck with me 😤💖</div>
+        <button class="surprise-btn" id="surpriseBtn">press for surprise 👀</button>
+    </div>
+
+    <!-- Surprise Modal -->
+    <div class="glass-card" id="surpriseModal">
+        <div class="modal-message" id="modalText">thank u for existing AMIRAHH FATINN yang cantikkkk❤️</div>
+    </div>
+
+    <script>
+        // === VARIABLES ===
+        const noBtn = document.getElementById('noBtn');
+        const yesBtn = document.getElementById('yesBtn');
+        const mainCard = document.getElementById('mainCard');
+        const revealScreen = document.getElementById('revealScreen');
+        const surpriseBtn = document.getElementById('surpriseBtn');
+        const surpriseModal = document.getElementById('surpriseModal');
+        const modalText = document.getElementById('modalText');
+        const musicToggle = document.getElementById('musicToggle');
+        const bgMusic = document.getElementById('bgMusic');
+
+        let noAttempts = 0;
+        const maxAttempts = 6;
+        let isMusicPlaying = false;
+
+        const funnyMessages = [
+            "ehh jangan tekan ni 😭",
+            "u sureee? 🤨",
+            "system rejected ur negativity 😤",
+            "access denied babeee",
+            "this button is emotionally unavailable",
+            "okay fine 😔"
+        ];
+
+        const romanticQuotes = [
+            "thank u for existing ❤️",
+            "u make my world less stressful 😭",
+            "my favorite notification is u",
+            "i love u more than my favorite food 💻💖"
+        ];
+
+        // === MUSIC TOGGLE ===
+        musicToggle.addEventListener('click', () => {
+            if (isMusicPlaying) { bgMusic.pause(); musicToggle.innerText = "🎵"; } 
+            else { bgMusic.play(); musicToggle.innerText = "🔇"; }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // === "NO" BUTTON DODGE LOGIC ===
+        function dodgeButton() {
+            if (noAttempts >= maxAttempts) return; // Button surrendered
+
+            // Change Text
+            noBtn.innerText = funnyMessages[noAttempts];
+            
+            // Calculate random positions bounded by screen size
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
+            const maxX = window.innerWidth - btnWidth - 20;
+            const maxY = window.innerHeight - btnHeight - 20;
+
+            const randomX = Math.max(20, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(20, Math.floor(Math.random() * maxY));
+
+            // Move the button securely away
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+
+            // Shake the main card for chaos
+            mainCard.classList.remove('shake');
+            void mainCard.offsetWidth; // Trigger reflow
+            mainCard.classList.add('shake');
+
+            // Grow the "Yes" Button
+            let scale = 1 + (noAttempts * 0.4);
+            yesBtn.style.transform = `scale(${scale})`;
+            yesBtn.style.boxShadow = `0 0 ${20 + noAttempts * 10}px rgba(255, 77, 109, ${0.4 + noAttempts*0.1})`;
+
+            noAttempts++;
+
+            // Check if Surrendered
+            if (noAttempts >= maxAttempts) {
+                noBtn.style.position = 'static';
+                noBtn.style.transform = 'none';
+                noBtn.innerText = "okay fine 😔";
+                noBtn.style.opacity = '0.5';
+            }
+        }
+
+        // Support both mouse and mobile touch
+        noBtn.addEventListener('mouseover', dodgeButton);
+        noBtn.addEventListener('touchstart', (e) => {
+            if (noAttempts < maxAttempts) {
+                e.preventDefault(); // Stop click from registering immediately on mobile
+                dodgeButton();
+            }
+        }, { passive: false });
+
+        // If they click it after it surrenders
+        noBtn.addEventListener('click', () => {
+            if (noAttempts >= maxAttempts) { showReveal(); }
+        });
+
+        // === REVEAL LOGIC ===
+        yesBtn.addEventListener('click', showReveal);
+
+        function showReveal() {
+            mainCard.style.display = 'none';
+            revealScreen.style.display = 'flex';
+            document.body.style.background = "#ff4d6d";
+            bgMusic.play(); // Play music on win!
+            musicToggle.style.display = "none";
+            
+            // Confetti/Heart explosion
+            for (let i = 0; i < 100; i++) {
+                setTimeout(createHeart, i * 50);
+            }
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart-particle');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 2 + 3) + 's'; // 3 to 5 seconds
+            
+            // Random sizing
+            const scale = Math.random() * 1.5 + 0.5;
+            heart.style.transform = `scale(${scale})`;
+
+            document.body.appendChild(heart);
+            setTimeout(() => { heart.remove(); }, 5000);
+        }
+
+        // === SURPRISE MODAL LOGIC ===
+        let quoteIndex = 0;
+        surpriseBtn.addEventListener('click', () => {
+            surpriseBtn.style.display = 'none';
+            surpriseModal.style.display = 'block';
+            
+            setInterval(() => {
+                quoteIndex = (quoteIndex + 1) % romanticQuotes.length;
+                modalText.style.opacity = 5;
+                setTimeout(() => {
+                    modalText.innerText = romanticQuotes[quoteIndex];
+                    modalText.style.opacity = 1;
+                    modalText.style.transition = "opacity 0.5s";
+                }, 500);
+            }, 3000); // Change message every 3 seconds
+        });
+    </script>
+</body>
+</html>
